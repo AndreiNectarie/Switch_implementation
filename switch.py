@@ -4,6 +4,7 @@ import struct
 import wrapper
 import threading
 import time
+from helpers import *
 from wrapper import recv_from_any_link, send_to_link, get_switch_mac, get_interface_name
 
 def parse_ethernet_header(data):
@@ -33,6 +34,7 @@ def send_bdpu_every_sec():
     while True:
         # TODO Send BDPU every second if necessary
         time.sleep(1)
+
 
 def main():
     # init returns the max interface number. Our interfaces
@@ -76,7 +78,18 @@ def main():
         print("Received frame of size {} on interface {}".format(length, interface), flush=True)
 
         # TODO: Implement forwarding with learning
+        update_MAC_table(src_mac, interface)
+        
+        if dest_mac in mac_table:
+            # Forward the frame to the interface where the destination MAC is located
+            send_to_link(mac_table[dest_mac], length, data)
+        else:
+            # Flood the frame to all interfaces except the one where it came from
+            for i in interfaces:
+                if i != interface:
+                    send_to_link(i, length, data)
         # TODO: Implement VLAN support
+        
         # TODO: Implement STP support
 
         # data is of type bytes.
