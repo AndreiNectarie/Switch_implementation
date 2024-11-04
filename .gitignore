@@ -2,3 +2,6 @@ __pycache__
 sim/__pycache__
 *.so
 *.o
+switch_2_out
+switch_1_out
+switch_0_out
