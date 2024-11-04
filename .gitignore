@@ -5,3 +5,7 @@ sim/__pycache__
 switch_2_out
 switch_1_out
 switch_0_out
+switch_2_err
+switch_1_err
+switch_0_err
+hosts_output
