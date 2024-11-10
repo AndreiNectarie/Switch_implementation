@@ -29,7 +29,6 @@ lib.get_interface_name.restype = ctypes.c_char_p
 # urmeaza sa le folosim implementarea noastra
 def init(argv_p):
     # Get the command-line arguments using sys.argv
-    print("Initializing the switch")
     argv = [arg.encode('utf-8') for arg in argv_p]  # Convert each argument to bytes
 
     # Convert the list to a ctypes array

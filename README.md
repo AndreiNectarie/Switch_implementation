@@ -1,31 +1,46 @@
-Scheleton for the Hub implementation.
+# switch.py
 
-## Running
+This file contains the main logic for a network switch implementation with VLAN redirecting and MAC address learning capabilities.
 
-```bash
-sudo python3 checker/topo.py
-```
+## Workflow
 
-This will open 9 terminals, 6 hosts and 3 for the switches. On the switch terminal you will run 
+1. **Initialization**:
+    - The switch is initialized with a unique ID and a list of network interfaces.
+    - The `wrapper.init()` function initializes the interfaces and returns the number of interfaces.
+    - VLAN configuration and switch priority are loaded using `load_vlan_config(switch_id)`.
 
-```bash
-make run_switch SWITCH_ID=X # X is 0,1 or 2
-```
+2. **Thread for BDPU**:
+    - A separate thread is started to send BDPUs every second using the `send_bdpu_every_sec()` function.
 
-The hosts have the following IP addresses.
-```
-host0 192.168.1.1
-host1 192.168.1.2
-host2 192.168.1.3
-host3 192.168.1.4
-host4 192.168.1.5
-host5 192.168.1.6
-```
+3. **Main Loop**:
+    - The switch enters an infinite loop where it listens for incoming frames on any interface using `recv_from_any_link()`.
+    - For each received frame:
+        - The Ethernet header is parsed using `parse_ethernet_header(data)`.
+        - Then the program checks if the destination MAC address is known, using the MAC table. If it does know the path, it will send it directly. If it doesn't, it will start flooding the network.
+        - The VLAN ID is determined based on the frame and the interface configuration. VLAN ID = -1 means that we have a trunk interface which accepts packets with any VLAN ID.
+        - When a packet is sent through a trunk interface, It will have an added header, 802.1Q. So every time a packet is sent to a destination, we first check if it has the added header. If it's being send through a trunk, i ll leave it in. If it s send to a host, i ll take it out and forward it.
 
-We will be testing using the ICMP. For example, from host0 we will run:
+## Added Functions
 
-```
-ping 192.168.1.2
-```
+### `has_vlan_tag(data)`
 
-Note: We will use wireshark for debugging. From any terminal you can run `wireshark&`.
+Checks if the given data has a VLAN tag.
+
+- **Parameters**: 
+  - `data` (bytes): The raw Ethernet frame data.
+- **Returns**: 
+  - `bool`: `True` if the frame has a VLAN tag, `False` otherwise.
+
+### `main()`
+
+The main function that initializes the switch, starts the BDPU thread, and enters the main loop to process incoming frames.
+
+## Dependencies
+
+- `sys`
+- `struct`
+- `wrapper`
+- `threading`
+- `time`
+- `helpers`
+- `Switch`
